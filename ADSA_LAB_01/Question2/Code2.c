@@ -15,7 +15,7 @@ int TernarySearch(int arr[], int min, int high,int x){
         }
         
         else if(arr[mid2] == x) {
-            printf("%d","Index Found at Index :");
+            printf("Index Found at Index :");
             printf("%d",mid1);
             return 0;
         }
@@ -86,4 +86,5 @@ int main() {
     }
     
     return 0;
+
 }
