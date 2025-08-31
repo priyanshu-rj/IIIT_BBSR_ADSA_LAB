@@ -1,5 +1,4 @@
 // Ternary Search and Binary Search Comprision
-
 #include <stdio.h>
 
 int TernarySearch(int arr[], int min, int high, int x, int *count1) {
