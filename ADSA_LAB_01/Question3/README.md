@@ -30,42 +30,52 @@ The goal is to identify that defective coin efficiently.
 ## ⏱️ Time Complexity (Why it is `O(log n)`)
 
 We use a **binary-search-like** strategy: at each step we compare around a midpoint and **discard half** of the remaining search interval.
+### 📊 Recurrence and Solution
 
-### Recurrence and solution
-Let `T(n)` be the worst-case number of steps for an input of size `n`.  
-Each step does `O(1)` work (a few comparisons) and reduces the problem to **half** the size:
+Let $T(n)$ be the worst-case number of steps for an input of size $n$.  
+Each step does $O(1)$ work (a few comparisons) and reduces the problem to **half** the size:
 
-\[
-T(n) = T\!\left(\frac{n}{2}\right) + O(1)
-\]
+T(n) = T((n/2)) + O(1)
 
-Unrolling (repeated substitution):
+---
 
-\[
-\begin{aligned}
-T(n) &= T\!\left(\frac{n}{2}\right) + c \\
-     &= T\!\left(\frac{n}{4}\right) + 2c \\
-     &\;\;\vdots \\
-     &= T\!\left(\frac{n}{2^k}\right) + kc
-\end{aligned}
-\]
+#### 🔹 Unrolling (repeated substitution)
 
-Stop when the subproblem size is 1: \(\frac{n}{2^k} = 1 \Rightarrow k = \log_2 n\).  
+T(n) = T((n/2)) + c  
+     = T((n/4)) + 2c  
+     = ...  
+     = T((n/2^k)) + kc  
+
+Stop when the subproblem size is 1:
+
+(n / 2^k) = 1  ⇒  k = log₂ n  
+
 Thus,
 
-\[
-T(n) = T(1) + c \log_2 n = O(\log n).
-\]
+T(n) = T(1) + c log₂ n = O(log n)
 
-(Base of the logarithm only changes the constant factor: \(\log_a n = \frac{\log_b n}{\log_b a}\).)
+---
 
-### Inductive view (interval halving)
-After each iteration the interval length halves:
-\[
-n \;\to\; \frac{n}{2} \;\to\; \frac{n}{4} \;\to\; \cdots \;\to\; \frac{n}{2^k}.
-\]
-After \(k = \lceil \log_2 n \rceil\) iterations, the interval size is \(\le 1\), so the search finishes.  
-Hence, worst-case comparisons grow as \(\Theta(\log n)\).
+#### 🔹 Base-change note
+
+The base of the logarithm only changes the constant factor:
+
+logₐ n = (log_b n) / (log_b a)
+
+---
+
+#### 🔹 Inductive view (interval halving)
+
+After each iteration, the interval length halves:
+
+n → n/2 → n/4 → ... → n/2^k  
+
+After k = ⌈log₂ n⌉ iterations, the interval size is ≤ 1, so the search finishes.  
+Hence, worst-case comparisons grow as:
+
+Θ(log n)
+
+
 
 ### Space Complexity
 The implementation is iterative and stores only a few indices (`low`, `high`, `mid`) → **O(1)** extra space.
