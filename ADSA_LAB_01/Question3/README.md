@@ -7,7 +7,7 @@ The goal is to identify that defective coin efficiently.
 ---
 
 ## ⚡ Features
-- Uses **binary-search-like logic** to quickly locate the defective coin.
+- Uses **divide and conquer logic** to quickly locate the defective coin.
 - Handles cases where the defective coin is at:
   - The beginning  
   - The middle  
