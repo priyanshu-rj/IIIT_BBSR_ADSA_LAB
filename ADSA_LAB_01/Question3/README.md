@@ -77,13 +77,6 @@ Hence, worst-case comparisons grow as:
 
 
 
-### Space Complexity
-The implementation is iterative and stores only a few indices (`low`, `high`, `mid`) → **O(1)** extra space.
-
-> **Important:** To truly achieve `O(log n)`, each step must **discard half the search space** (adjusting `low`/`high` around `mid`). If you advance with `low++` linearly, the worst case becomes `O(n)`. Ensure your `find()` updates `low/high` by **halves**, not by single increments.
-
-
-
 ### 🔹 `main()`
 1. Takes array size `n`.  
 2. Reads `n` coin values.  
