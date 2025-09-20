@@ -1,20 +1,18 @@
 #include <stdio.h>
 #include <math.h>
+#include "munit.h"
 
-#define N 3   // Matrix size (change as needed)
+#define N 3
+#define EPS 1e-6  // tolerance for floating-point comparison
 
-// Perform LUP decomposition (A -> L and U in same array)
+// LUP decomposition function
 int lup_decompose(double A[N][N], int P[N]) {
     int i, j, k, pivot;
     double maxA, absA, temp;
 
-    // Initialize permutation vector
-    for (i = 0; i < N; i++) {
-        P[i] = i;
-    }
+    for (i = 0; i < N; i++) P[i] = i;
 
     for (i = 0; i < N; i++) {
-        // Find pivot row
         maxA = 0.0;
         pivot = i;
         for (k = i; k < N; k++) {
@@ -24,107 +22,72 @@ int lup_decompose(double A[N][N], int P[N]) {
                 pivot = k;
             }
         }
+        if (maxA < 1e-12) return 0;  // singular
 
-        if (maxA < 1e-12) {
-            return 0; // Singular matrix
-        }
-
-        // Swap rows in permutation
         if (pivot != i) {
-            int tmp = P[i];
-            P[i] = P[pivot];
-            P[pivot] = tmp;
+            int tmp = P[i]; P[i] = P[pivot]; P[pivot] = tmp;
+            for (j = 0; j < N; j++) {
+                temp = A[i][j]; A[i][j] = A[pivot][j]; A[pivot][j] = temp;
+            }
         }
 
-        // Swap rows in A
-        for (j = 0; j < N; j++) {
-            temp = A[i][j];
-            A[i][j] = A[pivot][j];
-            A[pivot][j] = temp;
-        }
-
-        // Elimination
         for (j = i + 1; j < N; j++) {
             A[j][i] /= A[i][i];
-            for (k = i + 1; k < N; k++) {
+            for (k = i + 1; k < N; k++)
                 A[j][k] -= A[j][i] * A[i][k];
-            }
         }
     }
     return 1;
 }
 
-// Print L, U, P matrices
-void print_decomposition(double A[N][N], int P[N]) {
-    int i, j;
-    double L[N][N] = {0}, U[N][N] = {0}, Pm[N][N] = {0};
+// Test case 1: simple 3x3 matrix
+static char* test_lup_simple(const MunitParameter params[], void* data) {
+    double A[N][N] = {
+        {2, 1, 1},
+        {4, -6, 0},
+        {-2, 7, 2}
+    };
+    int P[N];
+    int status = lup_decompose(A, P);
+    munit_assert_int(status, ==, 1);
 
-    // Extract L and U
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-            if (i > j)
-                L[i][j] = A[i][j];
-            else if (i == j)
-                L[i][j] = 1.0;
-            else
-                L[i][j] = 0.0;
+    // Check pivot array
+    int expected_P[N] = {0, 2, 1};
+    for (int i = 0; i < N; i++)
+        munit_assert_int(P[i], ==, expected_P[i]);
 
-            if (i <= j)
-                U[i][j] = A[i][j];
-            else
-                U[i][j] = 0.0;
-        }
-    }
-
-    // Build permutation matrix Pm
-    for (i = 0; i < N; i++) {
-        Pm[i][P[i]] = 1.0;
-    }
-
-    // Print L
-    printf("\nL matrix:\n");
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++)
-            printf("%8.4f ", L[i][j]);
-        printf("\n");
-    }
-
-    // Print U
-    printf("\nU matrix:\n");
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++)
-            printf("%8.4f ", U[i][j]);
-        printf("\n");
-    }
-
-    // Print P
-    printf("\nP matrix:\n");
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++)
-            printf("%8.4f ", Pm[i][j]);
-        printf("\n");
-    }
+    return NULL;
 }
 
-int main() {
-    double A[N][N];
+// Test case 2: singular matrix
+static char* test_lup_singular(const MunitParameter params[], void* data) {
+    double A[N][N] = {
+        {1, 2, 3},
+        {2, 4, 6},
+        {3, 6, 9}
+    };
     int P[N];
+    int status = lup_decompose(A, P);
+    munit_assert_int(status, ==, 0);  // Should detect singular
+    return NULL;
+}
 
-    // Input matrix from user
-    printf("Enter elements of a %dx%d matrix A:\n", N, N);
-    for (int i = 0; i < N; i++) {
-        for (int j = 0; j < N; j++) {
-            printf("A[%d][%d] = ", i, j);
-            scanf("%lf", &A[i][j]);
-        }
-    }
+// List of tests
+static MunitTest test_suite_tests[] = {
+    {"/lup/simple", test_lup_simple, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {"/lup/singular", test_lup_singular, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL},
+    {NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL}
+};
 
-    if (!lup_decompose(A, P)) {
-        printf("Matrix is singular!\n");
-        return -1;
-    }
+// Test suite
+static const MunitSuite test_suite = {
+    "/lup",
+    test_suite_tests,
+    NULL,
+    1,
+    MUNIT_SUITE_OPTION_NONE
+};
 
-    print_decomposition(A, P);
-
-    return 0;
+int main(int argc, char* argv[]) {
+    return munit_suite_main(&test_suite, NULL, argc, argv);
 }
