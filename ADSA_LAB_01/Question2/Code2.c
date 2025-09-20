@@ -1,6 +1,7 @@
-// Ternary Search and Binary Search Comprision
 #include <stdio.h>
+#include "munit.h"   // download munit.h and include it
 
+// ---------------- Binary & Ternary Search ----------------
 int TernarySearch(int arr[], int min, int high, int x, int *count1) {
     while (min <= high) {
         int mid1 = min + (high - min) / 3;
@@ -8,15 +9,11 @@ int TernarySearch(int arr[], int min, int high, int x, int *count1) {
 
         (*count1)++;
         if (arr[mid1] == x) {
-            printf("Index Found at Index : %d", mid1);
-            printf("\nTernarySearch Comparisons : %d\n", *count1);
             return mid1;
         }
 
-        (*count1)++;  
+        (*count1)++;
         if (arr[mid2] == x) {
-            printf("Index Found at Index : %d", mid2);
-            printf("\nTernarySearch Comparisons : %d\n", *count1);
             return mid2;
         }
 
@@ -38,10 +35,8 @@ int BinarySearch(int arr[], int min, int high, int x, int *count2) {
     while (min <= high) {
         int mid = min + (high - min) / 2;
 
-        (*count2)++; 
+        (*count2)++;
         if (arr[mid] == x) {
-            printf("\nKey found at Index: %d", mid);
-            printf("\nBinarySearch Comparisons: %d\n", *count2);
             return mid;
         }
 
@@ -54,30 +49,81 @@ int BinarySearch(int arr[], int min, int high, int x, int *count2) {
     return -1;
 }
 
-int main() {
+// ---------------------- TEST CASES ----------------------
+
+// Test both searches when element exists
+static MunitResult test_search_found(const MunitParameter params[], void* data) {
+    int arr[] = {1, 3, 5, 7, 9, 11};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
     int count1 = 0, count2 = 0;
-    int n;
-    printf("Enter Size of Array: ");
-    scanf("%d", &n);
+    int key = 7;
 
-    int arr[n];
-    printf("Enter Array Elements: ");
-    for (int i = 0; i < n; i++) {
-        scanf("%d", &arr[i]);
-    }
+    int tResult = TernarySearch(arr, 0, n - 1, key, &count1);
+    int bResult = BinarySearch(arr, 0, n - 1, key, &count2);
 
-    int min = 0, high = n - 1;
-    int x;
-    printf("Enter value of key: ");
-    scanf("%d", &x);
+    // Check index correctness
+    munit_assert_int(tResult, ==, 3);  // index of 7
+    munit_assert_int(bResult, ==, 3);
 
-    int Ternary = TernarySearch(arr, min, high, x, &count1);
-    if (Ternary == -1)
-        printf("\nKey not found in Ternary Search\n");
+    // Check that comparisons happened (non-zero)
+    munit_assert_int(count1 > 0, ==, 1);
+    munit_assert_int(count2 > 0, ==, 1);
 
-    int Binary = BinarySearch(arr, min, high, x, &count2);
-    if (Binary == -1)
-        printf("\nKey not found in Binary Search\n");
+    return MUNIT_OK;
+}
 
-    return 0;
+// Test both searches when element is not found
+static MunitResult test_search_not_found(const MunitParameter params[], void* data) {
+    int arr[] = {2, 4, 6, 8, 10};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    int count1 = 0, count2 = 0;
+    int key = 7;
+
+    int tResult = TernarySearch(arr, 0, n - 1, key, &count1);
+    int bResult = BinarySearch(arr, 0, n - 1, key, &count2);
+
+    munit_assert_int(tResult, ==, -1);
+    munit_assert_int(bResult, ==, -1);
+
+    return MUNIT_OK;
+}
+
+// Test edge case: searching first element
+static MunitResult test_search_first_element(const MunitParameter params[], void* data) {
+    int arr[] = {5, 10, 15, 20};
+    int n = sizeof(arr) / sizeof(arr[0]);
+
+    int count1 = 0, count2 = 0;
+    int key = 5;
+
+    int tResult = TernarySearch(arr, 0, n - 1, key, &count1);
+    int bResult = BinarySearch(arr, 0, n - 1, key, &count2);
+
+    munit_assert_int(tResult, ==, 0);
+    munit_assert_int(bResult, ==, 0);
+
+    return MUNIT_OK;
+}
+
+// ---------------------- REGISTER TESTS ----------------------
+static MunitTest tests[] = {
+    { "/test_search_found", test_search_found, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+    { "/test_search_not_found", test_search_not_found, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+    { "/test_search_first_element", test_search_first_element, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL },
+    { NULL, NULL, NULL, NULL, MUNIT_TEST_OPTION_NONE, NULL }
+};
+
+static const MunitSuite suite = {
+    "/search-suite",   // Suite name
+    tests,             // The tests to run
+    NULL,              // No sub-suites
+    1,                 // Iterations
+    MUNIT_SUITE_OPTION_NONE
+};
+
+// ---------------------- MAIN ----------------------
+int main(int argc, char* argv[]) {
+    return munit_suite_main(&suite, NULL, argc, argv);
 }
